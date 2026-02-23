@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, Heart, Share2, Navigation, Trash2, Clock, MapPin, ChevronLeft, ChevronRight, Edit } from 'lucide-react';
+import { X, Heart, Share2, Navigation, Trash2, Clock, MapPin, ChevronLeft, ChevronRight, Edit, PhoneCall } from 'lucide-react';
 import EditShopModal from './EditShopModal';
+import ReviewSection from './ReviewSection';
 
 const CATEGORY_COLORS = {
     Food: '#ef4444',
@@ -11,11 +12,7 @@ const CATEGORY_COLORS = {
     Other: '#6b7280',
 };
 
-/**
- * Full-detail slide-in drawer for a selected shop.
- * Image carousel, shop info, and action buttons.
- */
-export default function ShopDetailDrawer({ shop, onClose, isFavorite, onToggleFavorite, onDelete, onShare, onEdit, canEdit }) {
+export default function ShopDetailDrawer({ shop, currentUser, onRefreshShops, onClose, isFavorite, onToggleFavorite, onDelete, onShare, onEdit, canEdit }) {
     const [imgIndex, setImgIndex] = useState(0);
     const [confirmDelete, setConfirmDelete] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -39,6 +36,14 @@ export default function ShopDetailDrawer({ shop, onClose, isFavorite, onToggleFa
     const createdDate = shop.created_at
         ? new Date(shop.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
         : null;
+
+    const handleShare = () => {
+        const url = `${window.location.origin}/#shop=${shop.id}`;
+        navigator.clipboard.writeText(url)
+            .then(() => alert(`Link copied to clipboard! ${url}`))
+            .catch(err => console.error('Could not copy text: ', err));
+        if (onShare) onShare();
+    };
 
     return (
         <div className="detail-overlay animate-fade" onClick={onClose}>
@@ -103,6 +108,26 @@ export default function ShopDetailDrawer({ shop, onClose, isFavorite, onToggleFa
                         </div>
                     )}
 
+                    {shop.phone && (
+                        <div className="detail-field">
+                            <span className="detail-label">Phone</span>
+                            <span className="detail-value">
+                                <PhoneCall size={13} style={{ marginRight: '6px' }} />
+                                <a href={`tel:${shop.phone}`} style={{ color: 'var(--primary)', textDecoration: 'none' }}>{shop.phone}</a>
+                            </span>
+                        </div>
+                    )}
+
+                    {shop.opening_hours && (
+                        <div className="detail-field">
+                            <span className="detail-label">Hours</span>
+                            <span className="detail-value">
+                                <Clock size={13} style={{ marginRight: '6px' }} />
+                                {shop.opening_hours}
+                            </span>
+                        </div>
+                    )}
+
                     {shop.description && (
                         <div className="detail-field">
                             <span className="detail-label">About</span>
@@ -138,7 +163,7 @@ export default function ShopDetailDrawer({ shop, onClose, isFavorite, onToggleFa
                         <Heart size={18} fill={isFavorite ? '#ef4444' : 'none'} />
                         <span>{isFavorite ? 'Favorited' : 'Favorite'}</span>
                     </button>
-                    <button className="detail-action-btn" onClick={onShare}>
+                    <button className="detail-action-btn" onClick={handleShare}>
                         <Share2 size={18} />
                         <span>Share</span>
                     </button>
@@ -169,6 +194,13 @@ export default function ShopDetailDrawer({ shop, onClose, isFavorite, onToggleFa
                         </>
                     )}
                 </div>
+
+                {/* Reviews & Verification */}
+                <ReviewSection
+                    shop={shop}
+                    currentUser={currentUser}
+                    onRefreshShops={onRefreshShops}
+                />
             </div>
 
             {/* Edit Modal */}

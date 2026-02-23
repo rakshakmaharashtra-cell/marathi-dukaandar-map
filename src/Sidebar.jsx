@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Plus, X, Menu, Store, Heart, Clock, LogOut } from 'lucide-react';
+import { useTranslation } from './i18n.jsx';
 
 const CATEGORY_COLORS = {
     Food: '#ef4444',
@@ -17,6 +18,7 @@ const CATEGORY_COLORS = {
 export default function Sidebar({ shops, onAddShop, isOpen, setIsOpen, onShopClick, isFavorite, favorites, onLogout, currentUser }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('all'); // 'all' | 'favorites' | 'recent'
+    const { t, language, toggleLanguage } = useTranslation();
 
     // Filter by search
     let filtered = shops.filter(
@@ -42,14 +44,20 @@ export default function Sidebar({ shops, onAddShop, isOpen, setIsOpen, onShopCli
 
             <div className={`sidebar ${isOpen ? 'open' : ''}`}>
                 {/* Header */}
-                <div className="sidebar-header">
+                <div className="sidebar-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div className="sidebar-logo">
                         <span className="logo-icon">🚩</span>
                         <div>
-                            <h1>Marathi Dukandaar</h1>
-                            <p>Discover & support Marathi businesses</p>
+                            <h1>{t('app_title')}</h1>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Made in Maharashtra</p>
                         </div>
                     </div>
+                    <button
+                        onClick={toggleLanguage}
+                        style={{ background: 'var(--primary-light)', color: 'var(--primary)', border: 'none', padding: '6px 12px', borderRadius: '16px', fontSize: '0.8rem', fontWeight: 600, cursor: 'pointer', transition: '0.2s' }}
+                    >
+                        {language === 'en' ? 'मराठी' : 'English'}
+                    </button>
                 </div>
 
                 {/* Add Shop Button */}
@@ -62,7 +70,7 @@ export default function Sidebar({ shops, onAddShop, isOpen, setIsOpen, onShopCli
                         }}
                     >
                         <Plus size={18} />
-                        Add New Shop
+                        {t('add_shop')}
                     </button>
                 </div>
 
@@ -73,7 +81,7 @@ export default function Sidebar({ shops, onAddShop, isOpen, setIsOpen, onShopCli
                         <input
                             type="text"
                             className="search-input"
-                            placeholder="Search by name, category, owner..."
+                            placeholder={t('search_shops')}
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
@@ -164,10 +172,22 @@ export default function Sidebar({ shops, onAddShop, isOpen, setIsOpen, onShopCli
                 <div className="sidebar-footer">
                     <div className="sidebar-user-row">
                         <span className="sidebar-user-name">👋 {currentUser?.name || 'User'}</span>
-                        <button className="sidebar-logout-btn" onClick={onLogout} title="Logout">
-                            <LogOut size={16} />
-                            Logout
-                        </button>
+                        <div style={{ display: 'flex', gap: '6px' }}>
+                            {currentUser?.role === 'admin' && (
+                                <button
+                                    className="sidebar-logout-btn"
+                                    style={{ color: 'var(--saffron)', borderColor: 'var(--saffron)' }}
+                                    onClick={() => window.location.hash = '#/admin'}
+                                    title="Go to Admin Dashboard"
+                                >
+                                    Admin
+                                </button>
+                            )}
+                            <button className="sidebar-logout-btn" onClick={onLogout} title="Logout">
+                                <LogOut size={16} />
+                                Logout
+                            </button>
+                        </div>
                     </div>
                     <p>Made with ❤️ for Marathi Manus 🚩</p>
                 </div>

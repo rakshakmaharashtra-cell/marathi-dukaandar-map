@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Check, ImagePlus, Trash2, MapPin } from 'lucide-react';
+import { supabase } from './supabaseClient';
 
 const CATEGORIES = [
     { value: 'Food', label: '🍛 Food & Snacks' },
@@ -28,6 +29,8 @@ export default function AddShopForm({ position, onSubmit, onCancel }) {
     const [ownerName, setOwnerName] = useState('');
     const [category, setCategory] = useState('Food');
     const [description, setDescription] = useState('');
+    const [phone, setPhone] = useState('');
+    const [openingHours, setOpeningHours] = useState('');
     const [images, setImages] = useState([]);
     const [isUploading, setIsUploading] = useState(false);
     const fileInputRef = useRef(null);
@@ -35,23 +38,16 @@ export default function AddShopForm({ position, onSubmit, onCancel }) {
     const lat = position ? position.lat.toFixed(6) : '19.076000';
     const lng = position ? position.lng.toFixed(6) : '72.877700';
 
-    const handleImageChange = async (e) => {
+    const handleImageChange = (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
 
-        setIsUploading(true);
-        try {
-            const newImages = await Promise.all(
-                files.map(async (file) => ({
-                    base64: await fileToBase64(file),
-                    name: file.name,
-                }))
-            );
-            setImages((prev) => [...prev, ...newImages].slice(0, 5));
-        } catch (err) {
-            console.error('Image upload error:', err);
-        }
-        setIsUploading(false);
+        const newImages = files.map(file => ({
+            file,
+            previewUrl: URL.createObjectURL(file),
+            name: file.name
+        }));
+        setImages((prev) => [...prev, ...newImages].slice(0, 5));
 
         if (fileInputRef.current) fileInputRef.current.value = '';
     };
@@ -65,20 +61,51 @@ export default function AddShopForm({ position, onSubmit, onCancel }) {
         return text.replace(/<[^>]*>/g, '').trim().slice(0, maxLength);
     }
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const cleanName = sanitizeText(name, 100);
         const cleanOwner = sanitizeText(ownerName, 100);
         const cleanDesc = sanitizeText(description, 1000);
+        const cleanPhone = sanitizeText(phone, 20);
+        const cleanHours = sanitizeText(openingHours, 100);
 
         if (!cleanName || !cleanOwner) return;
+
+        setIsUploading(true);
+
+        // Upload images to Supabase Storage
+        const uploadedUrls = [];
+        for (const img of images) {
+            if (img.file) {
+                const fileExt = img.file.name.split('.').pop();
+                const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('shop-images')
+                    .upload(fileName, img.file);
+
+                if (!uploadError) {
+                    const { data } = supabase.storage.from('shop-images').getPublicUrl(fileName);
+                    if (data?.publicUrl) {
+                        uploadedUrls.push(data.publicUrl);
+                    }
+                }
+            } else if (img.url) {
+                // If editing and img is already a URL
+                uploadedUrls.push(img.url);
+            }
+        }
+
+        setIsUploading(false);
 
         onSubmit({
             name: cleanName,
             owner_name: cleanOwner,
             category,
             description: cleanDesc,
-            images: images.map((img) => img.base64),
+            phone: cleanPhone,
+            opening_hours: cleanHours,
+            images: uploadedUrls,
             position: [parseFloat(lat), parseFloat(lng)],
         });
     };
@@ -182,7 +209,7 @@ export default function AddShopForm({ position, onSubmit, onCancel }) {
                             <div className="image-preview-grid">
                                 {images.map((img, i) => (
                                     <div key={i} className="image-preview-item">
-                                        <img src={img.base64} alt={img.name} />
+                                        <img src={img.previewUrl || img.url} alt={img.name} />
                                         <button
                                             type="button"
                                             className="image-remove-btn"
@@ -210,9 +237,9 @@ export default function AddShopForm({ position, onSubmit, onCancel }) {
                         <button type="button" className="btn-cancel" onClick={onCancel}>
                             Cancel
                         </button>
-                        <button type="submit" className="btn-submit" disabled={!name.trim() || !ownerName.trim()}>
+                        <button type="submit" className="btn-submit" disabled={!name.trim() || !ownerName.trim() || isUploading}>
                             <Check size={18} />
-                            Add Shop (+50 pts)
+                            {isUploading ? 'Uploading...' : 'Add Shop (+50 pts)'}
                         </button>
                     </div>
                 </form>

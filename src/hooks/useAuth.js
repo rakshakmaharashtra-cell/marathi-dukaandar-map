@@ -181,6 +181,18 @@ export default function useAuth() {
         return { success: true, message: '✅ Account created! Logging you in...' };
     }, []);
 
+    const loginWithGoogle = useCallback(async () => {
+        const { error } = await supabase.auth.signInWithOAuth({
+            provider: 'google',
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
+        if (error) {
+            return { success: false, error: error.message };
+        }
+    }, []);
+
     const logout = useCallback(async () => {
         await supabase.auth.signOut();
         Object.keys(localStorage).forEach((key) => {
@@ -203,6 +215,7 @@ export default function useAuth() {
         isLoggedIn: !!currentUser,
         isAdmin: currentUser?.role === 'admin',
         login,
+        loginWithGoogle,
         signup,
         logout,
         resetPassword,

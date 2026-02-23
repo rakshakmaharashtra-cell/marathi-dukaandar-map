@@ -67,6 +67,14 @@ export default function AdminDashboard({
                 </div>
                 <div className="admin-topbar-right">
                     <span className="admin-user-badge">👑 {currentUser?.name}</span>
+                    <button
+                        className="admin-logout-btn"
+                        onClick={() => window.location.hash = ''}
+                        style={{ borderColor: 'var(--border)', color: 'var(--text-secondary)' }}
+                        title="Back to Map"
+                    >
+                        <MapPin size={16} /> Map
+                    </button>
                     <button className="admin-logout-btn" onClick={onLogout}>
                         <LogOut size={16} /> Logout
                     </button>

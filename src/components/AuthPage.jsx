@@ -4,7 +4,7 @@ import { Mail, Lock, User, Eye, EyeOff, LogIn, UserPlus, ShieldCheck } from 'luc
 /**
  * Authentication page — Login / Sign Up / Forgot Password.
  */
-export default function AuthPage({ onLogin, onSignup, onResetPassword }) {
+export default function AuthPage({ onLogin, onSignup, onResetPassword, onLoginWithGoogle }) {
     const [tab, setTab] = useState('login'); // 'login' | 'signup' | 'forgot'
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -70,163 +70,230 @@ export default function AuthPage({ onLogin, onSignup, onResetPassword }) {
 
     return (
         <div className="auth-page">
-            <div className="auth-bg-decoration" />
-
+            {/* LEFT SIDE - Form Content */}
             <div className="auth-container animate-pop">
-                {/* Brand */}
                 <div className="auth-brand">
                     <span className="auth-logo-icon">🚩</span>
-                    <h1>Marathi Dukandaar Map</h1>
-                    <p>Discover &amp; support Marathi businesses in your community</p>
+                    <h1>Marathi Dukandaar</h1>
                 </div>
 
-                {/* Tabs */}
-                {tab !== 'forgot' && (
-                    <div className="auth-tabs">
-                        <button
-                            className={`auth-tab ${tab === 'login' ? 'active' : ''}`}
-                            onClick={() => switchTab('login')}
-                        >
-                            <LogIn size={16} /> Login
-                        </button>
-                        <button
-                            className={`auth-tab ${tab === 'signup' ? 'active' : ''}`}
-                            onClick={() => switchTab('signup')}
-                        >
-                            <UserPlus size={16} /> Sign Up
-                        </button>
-                    </div>
-                )}
+                <div className="auth-main-content">
+                    {tab === 'login' && <h2 className="auth-heading">Welcome back</h2>}
+                    {tab === 'signup' && <h2 className="auth-heading">Create an account</h2>}
+                    {tab === 'forgot' && <h2 className="auth-heading">Forgot Password</h2>}
 
-                {/* Messages */}
-                {error && <div className="auth-error animate-pop">⚠️ {error}</div>}
-                {success && <div className="auth-success animate-pop">✅ {success}</div>}
+                    <p className="auth-subheading">
+                        {tab === 'login' && 'Please enter your details to sign in.'}
+                        {tab === 'signup' && 'Join us to discover & support Marathi businesses.'}
+                        {tab === 'forgot' && "Enter your email and we'll send a reset link."}
+                    </p>
 
-                {/* LOGIN */}
-                {tab === 'login' && (
-                    <form onSubmit={handleLogin} className="auth-form">
-                        <div className="auth-field">
-                            <Mail size={16} className="auth-field-icon" />
-                            <input
-                                type="email"
-                                placeholder="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                autoFocus
-                                required
-                            />
-                        </div>
-                        <div className="auth-field">
-                            <Lock size={16} className="auth-field-icon" />
-                            <input
-                                type={showPass ? 'text' : 'password'}
-                                placeholder="Password"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="auth-eye-btn"
-                                onClick={() => setShowPass((p) => !p)}
-                            >
-                                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {/* Messages */}
+                    {error && <div className="auth-error animate-pop">⚠️ {error}</div>}
+                    {success && <div className="auth-success animate-pop">✅ {success}</div>}
+
+                    {/* LOGIN FORM */}
+                    {tab === 'login' && (
+                        <form onSubmit={handleLogin} className="auth-form">
+                            <div className="auth-field-group">
+                                <label>Email address</label>
+                                <div className="auth-field">
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="auth-field-group">
+                                <label>Password</label>
+                                <div className="auth-field">
+                                    <input
+                                        type={showPass ? 'text' : 'password'}
+                                        placeholder="••••••••"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="auth-eye-btn"
+                                        onClick={() => setShowPass((p) => !p)}
+                                    >
+                                        {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="auth-form-options">
+                                <label className="auth-remember">
+                                    <input type="checkbox" />
+                                    <span>Remember for 30 days</span>
+                                </label>
+                                <button type="button" className="auth-forgot-link" onClick={() => switchTab('forgot')}>
+                                    Forgot password
+                                </button>
+                            </div>
+
+                            <button type="submit" className="auth-submit-btn" disabled={loading}>
+                                {loading ? <span className="auth-spinner" /> : 'Sign in'}
                             </button>
-                        </div>
 
-                        <button type="button" className="auth-forgot-link" onClick={() => switchTab('forgot')}>
-                            Forgot Password?
-                        </button>
-
-                        <button type="submit" className="auth-submit-btn" disabled={loading}>
-                            {loading ? <span className="auth-spinner" /> : <LogIn size={18} />}
-                            {loading ? 'Logging in...' : 'Login'}
-                        </button>
-                    </form>
-                )}
-
-                {/* SIGN UP */}
-                {tab === 'signup' && (
-                    <form onSubmit={handleSignup} className="auth-form">
-                        <div className="auth-field">
-                            <User size={16} className="auth-field-icon" />
-                            <input
-                                type="text"
-                                placeholder="Full name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                autoFocus
-                                required
-                            />
-                        </div>
-                        <div className="auth-field">
-                            <Mail size={16} className="auth-field-icon" />
-                            <input
-                                type="email"
-                                placeholder="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                required
-                            />
-                        </div>
-                        <div className="auth-field">
-                            <Lock size={16} className="auth-field-icon" />
-                            <input
-                                type={showPass ? 'text' : 'password'}
-                                placeholder="Password (min 6 characters)"
-                                value={password}
-                                onChange={(e) => setPassword(e.target.value)}
-                                minLength={6}
-                                required
-                            />
-                            <button
-                                type="button"
-                                className="auth-eye-btn"
-                                onClick={() => setShowPass((p) => !p)}
-                            >
-                                {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                            {/* Google Sign In Placeholder (will be hooked up shortly) */}
+                            <button type="button" className="auth-google-btn" onClick={onLoginWithGoogle}>
+                                <svg className="auth-google-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                </svg>
+                                Sign in with Google
                             </button>
-                        </div>
-                        <button type="submit" className="auth-submit-btn" disabled={loading}>
-                            {loading ? <span className="auth-spinner" /> : <UserPlus size={18} />}
-                            {loading ? 'Creating account...' : 'Create Account'}
-                        </button>
-                    </form>
-                )}
+                        </form>
+                    )}
 
-                {/* FORGOT PASSWORD */}
-                {tab === 'forgot' && (
-                    <form onSubmit={handleForgot} className="auth-form">
-                        <p className="auth-forgot-desc">Enter your email and we'll send a reset link.</p>
-                        <div className="auth-field">
-                            <Mail size={16} className="auth-field-icon" />
-                            <input
-                                type="email"
-                                placeholder="Email address"
-                                value={email}
-                                onChange={(e) => setEmail(e.target.value)}
-                                autoFocus
-                                required
-                            />
-                        </div>
-                        <button type="submit" className="auth-submit-btn" disabled={loading}>
-                            {loading ? <span className="auth-spinner" /> : <Mail size={18} />}
-                            {loading ? 'Sending...' : 'Send Reset Link'}
-                        </button>
-                        <button type="button" className="auth-forgot-link" onClick={() => switchTab('login')}>
-                            ← Back to Login
-                        </button>
-                    </form>
-                )}
+                    {/* SIGN UP FORM */}
+                    {tab === 'signup' && (
+                        <form onSubmit={handleSignup} className="auth-form">
+                            <div className="auth-field-group">
+                                <label>Full name</label>
+                                <div className="auth-field">
+                                    <input
+                                        type="text"
+                                        placeholder="Enter your name"
+                                        value={name}
+                                        onChange={(e) => setName(e.target.value)}
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
+                            </div>
 
-                {/* Footer */}
-                <div className="auth-admin-hint">
-                    <ShieldCheck size={14} />
-                    <span>Admin access is role-protected</span>
+                            <div className="auth-field-group">
+                                <label>Email address</label>
+                                <div className="auth-field">
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="auth-field-group">
+                                <label>Password</label>
+                                <div className="auth-field">
+                                    <input
+                                        type={showPass ? 'text' : 'password'}
+                                        placeholder="At least 6 characters"
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        minLength={6}
+                                        required
+                                    />
+                                    <button
+                                        type="button"
+                                        className="auth-eye-btn"
+                                        onClick={() => setShowPass((p) => !p)}
+                                    >
+                                        {showPass ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '16px' }}>
+                                {loading ? <span className="auth-spinner" /> : 'Create Account'}
+                            </button>
+
+                            <button type="button" className="auth-google-btn" onClick={onLoginWithGoogle}>
+                                <svg className="auth-google-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
+                                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+                                </svg>
+                                Sign up with Google
+                            </button>
+                        </form>
+                    )}
+
+                    {/* FORGOT PASSWORD FORM */}
+                    {tab === 'forgot' && (
+                        <form onSubmit={handleForgot} className="auth-form">
+                            <div className="auth-field-group">
+                                <label>Email address</label>
+                                <div className="auth-field">
+                                    <input
+                                        type="email"
+                                        placeholder="Enter your email"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoFocus
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <button type="submit" className="auth-submit-btn" disabled={loading} style={{ marginTop: '16px' }}>
+                                {loading ? <span className="auth-spinner" /> : 'Send Reset Link'}
+                            </button>
+
+                            <div className="auth-switch-prompt" style={{ marginTop: '16px' }}>
+                                <button type="button" onClick={() => switchTab('login')}>
+                                    ← Back to log in
+                                </button>
+                            </div>
+                        </form>
+                    )}
+
+                    {/* Footer Links */}
+                    {tab === 'login' && (
+                        <div className="auth-switch-prompt">
+                            Don't have an account?
+                            <button type="button" onClick={() => switchTab('signup')}>Sign up</button>
+                        </div>
+                    )}
+
+                    {tab === 'signup' && (
+                        <div className="auth-switch-prompt">
+                            Already have an account?
+                            <button type="button" onClick={() => switchTab('login')}>Log in</button>
+                        </div>
+                    )}
                 </div>
-                <div className="auth-footer">
-                    <p>Made with ❤️ for Marathi Manus 🚩</p>
-                </div>
+            </div>
+
+            {/* RIGHT SIDE - Purple Illustration Panel */}
+            <div className="auth-side-panel animate-fade">
+                {/* SVG Illustration Placeholder that resembles the one provided */}
+                <svg className="auth-illustration" viewBox="0 0 400 300" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    {/* Background abstract elements */}
+                    <circle cx="200" cy="150" r="120" stroke="rgba(255,255,255,0.1)" strokeWidth="2" strokeDasharray="4 4" />
+                    <path d="M50 100 Q 150 50 250 150 T 400 100" stroke="rgba(255,255,255,0.2)" fill="none" strokeWidth="2" />
+                    <path d="M0 250 Q 100 200 200 280 T 400 220" stroke="rgba(255,255,255,0.15)" fill="none" strokeWidth="2" />
+                    <circle cx="80" cy="80" r="4" fill="rgba(255,255,255,0.4)" />
+                    <circle cx="320" cy="60" r="6" fill="rgba(255,255,255,0.3)" />
+                    <circle cx="340" cy="240" r="5" fill="rgba(255,255,255,0.5)" />
+                    <circle cx="60" cy="260" r="3" fill="rgba(255,255,255,0.2)" />
+
+                    {/* Fake UI window in the graphic */}
+                    <rect x="100" y="80" width="200" height="140" rx="10" fill="#ffffff" opacity="0.1" />
+                    <rect x="120" y="100" width="60" height="8" rx="4" fill="#ffffff" opacity="0.4" />
+                    <rect x="120" y="120" width="100" height="6" rx="3" fill="#ffffff" opacity="0.2" />
+                    <rect x="120" y="135" width="140" height="6" rx="3" fill="#ffffff" opacity="0.2" />
+                    <rect x="120" y="150" width="80" height="6" rx="3" fill="#ffffff" opacity="0.2" />
+                    <rect x="120" y="175" width="60" height="24" rx="12" fill="#ffffff" opacity="0.3" />
+
+                    {/* Checkmark circle */}
+                    <circle cx="260" cy="185" r="30" fill="#ffffff" opacity="0.2" />
+                    <path d="M245 185 L255 195 L275 175" stroke="#ffffff" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
             </div>
         </div>
     );

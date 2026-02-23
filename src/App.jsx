@@ -35,6 +35,7 @@ export default function App() {
     signup,
     logout,
     resetPassword,
+    loginWithGoogle, // Fixed: Added loginWithGoogle to prevent ReferenceError
     authLoading,
     roleLoading, // <- Extract roleLoading
   } = useAuth();
@@ -195,6 +196,20 @@ export default function App() {
   const rank = getRank();
   const progress = getProgress();
 
+  // Handle Deep Linking (#shop=UUID)
+  useEffect(() => {
+    if (allShops.length > 0) {
+      const hash = window.location.hash;
+      if (hash.startsWith('#shop=')) {
+        const targetId = hash.replace('#shop=', '');
+        const targetShop = allShops.find(s => s.id === targetId);
+        if (targetShop && selectedShop?.id !== targetId) {
+          setSelectedShop(targetShop);
+        }
+      }
+    }
+  }, [allShops]);
+
   // ═══ RENDERING ═══
 
   // Loading state
@@ -220,7 +235,7 @@ export default function App() {
       return <AdminLoginPage onLogin={login} />;
     }
     // Regular users → normal auth page
-    return <AuthPage onLogin={login} onSignup={signup} onResetPassword={resetPassword} />;
+    return <AuthPage onLogin={login} onSignup={signup} onResetPassword={resetPassword} onLoginWithGoogle={loginWithGoogle} />;
   }
 
   // Logged in as admin on admin route → Admin Dashboard
@@ -302,21 +317,25 @@ export default function App() {
         currentUser={currentUser}
       />
 
-      <ProfileCard
-        points={points}
-        rank={rank}
-        progress={progress}
-        user={currentUser}
-        onClickLeaderboard={() => setShowLeaderboard(true)}
-      />
+      {!isAddingMode && (
+        <>
+          <ProfileCard
+            points={points}
+            rank={rank}
+            progress={progress}
+            user={currentUser}
+            onClickLeaderboard={() => setShowLeaderboard(true)}
+          />
 
-      {/* Category Filter */}
-      {shops.length > 0 && (
-        <CategoryFilter active={categoryFilter} onChange={setCategoryFilter} shopCounts={shopCounts} />
+          {/* Category Filter */}
+          {shops.length > 0 && (
+            <CategoryFilter active={categoryFilter} onChange={setCategoryFilter} shopCounts={shopCounts} />
+          )}
+
+          {/* Stats Bar */}
+          {shops.length > 0 && <StatsBar shops={shops} favorites={favorites} points={points} />}
+        </>
       )}
-
-      {/* Stats Bar */}
-      {shops.length > 0 && <StatsBar shops={shops} favorites={favorites} points={points} />}
 
       {/* Add Shop Modal */}
       {showForm && selectedPosition && (
@@ -327,16 +346,17 @@ export default function App() {
       {selectedShop && (
         <ShopDetailDrawer
           shop={selectedShop}
-          onClose={() => setSelectedShop(null)}
+          currentUser={currentUser}
+          onRefreshShops={refreshShops}
+          onClose={() => {
+            setSelectedShop(null);
+            window.history.replaceState(null, '', window.location.pathname);
+          }}
           isFavorite={favorites.includes(selectedShop.id)}
           onToggleFavorite={toggleFavorite}
           onDelete={handleDeleteShop}
           onEdit={handleEditShop}
           canEdit={isAdmin || (currentUser?.id && selectedShop.submittedById === currentUser.id)}
-          onShare={() => {
-            navigator.clipboard.writeText(`${window.location.origin}/#shop-${selectedShop.id}`);
-            setToast({ message: 'Link copied to clipboard!', type: 'info' });
-          }}
         />
       )}{showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
 
