@@ -4,11 +4,11 @@ import { supabase } from '../supabaseClient';
 const MILESTONES = [50, 200, 500, 1000, 2000];
 
 const RANKS = [
-    { min: 0, label: 'Sahayak (Helper)', emoji: '🌱' },
-    { min: 50, label: 'Mavla (Soldier)', emoji: '⚔️' },
-    { min: 200, label: 'Sardar (Commander)', emoji: '🛡️' },
-    { min: 500, label: 'Sarsenapati (General)', emoji: '🚩' },
-    { min: 1000, label: 'Peshwa (Prime Minister)', emoji: '👑' },
+    { min: 0, label: 'Sahayak (Helper)', tKey: 'sahayak', emoji: '🌱' },
+    { min: 50, label: 'Mavla (Soldier)', tKey: 'mavla', emoji: '⚔️' },
+    { min: 200, label: 'Sardar (Commander)', tKey: 'sardar', emoji: '🛡️' },
+    { min: 500, label: 'Sarsenapati (General)', tKey: 'sarsenapati', emoji: '🚩' },
+    { min: 1000, label: 'Peshwa (Prime Minister)', tKey: 'peshwa', emoji: '👑' },
 ];
 
 /**

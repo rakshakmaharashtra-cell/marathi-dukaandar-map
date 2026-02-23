@@ -1,10 +1,12 @@
 import React from 'react';
 import { Store, MapPin, Heart, TrendingUp } from 'lucide-react';
+import { useTranslation } from '../i18n.jsx';
 
 /**
  * Stats widget showing community metrics: total shops, favorites, top category, points.
  */
 export default function StatsBar({ shops, favorites, points }) {
+    const { t } = useTranslation();
     const categoryCounts = {};
     shops.forEach((s) => {
         categoryCounts[s.category] = (categoryCounts[s.category] || 0) + 1;
@@ -22,7 +24,7 @@ export default function StatsBar({ shops, favorites, points }) {
                 </div>
                 <div className="stat-text">
                     <span className="stat-number">{shops.length}</span>
-                    <span className="stat-label">Shops</span>
+                    <span className="stat-label">{t('stats_shops')}</span>
                 </div>
             </div>
             <div className="stat-divider" />
@@ -32,7 +34,7 @@ export default function StatsBar({ shops, favorites, points }) {
                 </div>
                 <div className="stat-text">
                     <span className="stat-number">{favorites.length}</span>
-                    <span className="stat-label">Favorites</span>
+                    <span className="stat-label">{t('stats_favorites')}</span>
                 </div>
             </div>
             <div className="stat-divider" />
@@ -41,8 +43,8 @@ export default function StatsBar({ shops, favorites, points }) {
                     <MapPin size={16} />
                 </div>
                 <div className="stat-text">
-                    <span className="stat-number">{topCategory}</span>
-                    <span className="stat-label">Top Category</span>
+                    <span className="stat-number">{topCategory === '—' ? '—' : t(topCategory.toLowerCase().replace(' ', '_'))}</span>
+                    <span className="stat-label">{t('top_category')}</span>
                 </div>
             </div>
             <div className="stat-divider" />
@@ -52,7 +54,7 @@ export default function StatsBar({ shops, favorites, points }) {
                 </div>
                 <div className="stat-text">
                     <span className="stat-number">{points}</span>
-                    <span className="stat-label">Points</span>
+                    <span className="stat-label">{t('pts')}</span>
                 </div>
             </div>
         </div>

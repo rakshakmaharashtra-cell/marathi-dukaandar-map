@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
 import { Filter, X } from 'lucide-react';
+import { useTranslation } from '../i18n.jsx';
 
 const CATEGORIES = [
-    { value: 'All', label: '🗺️ All', color: '#f97316' },
-    { value: 'Food', label: '🍛 Food', color: '#ef4444' },
-    { value: 'Clothing', label: '👕 Clothing', color: '#8b5cf6' },
-    { value: 'Services', label: '🔧 Services', color: '#3b82f6' },
-    { value: 'Groceries', label: '🛒 Groceries', color: '#22c55e' },
-    { value: 'Electronics', label: '📱 Electronics', color: '#f59e0b' },
-    { value: 'Other', label: '📦 Other', color: '#6b7280' },
+    { value: 'All', icon: '🗺️', tKey: 'all_cat', color: '#f97316' },
+    { value: 'Food', icon: '🍛', tKey: 'food', color: '#ef4444' },
+    { value: 'Clothing', icon: '👕', tKey: 'clothing', color: '#8b5cf6' },
+    { value: 'Services', icon: '🔧', tKey: 'services', color: '#3b82f6' },
+    { value: 'Groceries', icon: '🛒', tKey: 'groceries', color: '#22c55e' },
+    { value: 'Electronics', icon: '📱', tKey: 'electronics', color: '#f59e0b' },
+    { value: 'Other', icon: '📦', tKey: 'other', color: '#6b7280' },
 ];
 
 /**
@@ -16,6 +17,7 @@ const CATEGORIES = [
  */
 export default function CategoryFilter({ active, onChange, shopCounts }) {
     const [isExpanded, setIsExpanded] = useState(false);
+    const { t } = useTranslation();
 
     return (
         <div className="category-filter-container">
@@ -23,10 +25,10 @@ export default function CategoryFilter({ active, onChange, shopCounts }) {
                 <button
                     className="category-filter-toggle animate-pop"
                     onClick={() => setIsExpanded(true)}
-                    title="Show Filters"
+                    title={t('filters_title')}
                 >
                     <Filter size={16} />
-                    <span>Filters</span>
+                    <span>{t('filters')}</span>
                     {active !== 'All' && <span className="active-dot" title={`Active: ${active}`} />}
                 </button>
             ) : (
@@ -47,7 +49,7 @@ export default function CategoryFilter({ active, onChange, shopCounts }) {
                                 onClick={() => onChange(cat.value)}
                                 style={active === cat.value ? { background: cat.color, borderColor: cat.color } : {}}
                             >
-                                {cat.label}
+                                {cat.icon} {t(cat.tKey)}
                                 {count !== null && <span className="filter-count">{count}</span>}
                             </button>
                         );

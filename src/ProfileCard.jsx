@@ -1,22 +1,24 @@
 import React from 'react';
 import { Award, TrendingUp, Trophy } from 'lucide-react';
+import { useTranslation } from './i18n.jsx';
 
 /**
  * Floating profile card — shows rank, points, and progress bar.
  * Clicking it opens the leaderboard.
  */
 export default function ProfileCard({ points, rank, progress, user, onClickLeaderboard }) {
+    const { t } = useTranslation();
     const badges = [];
-    if (points >= 50) badges.push({ icon: '🥉', title: 'Bronze Starter' });
-    if (points >= 150) badges.push({ icon: '🥈', title: 'Silver Contributor' });
-    if (points >= 300) badges.push({ icon: '🥇', title: 'Gold Local Guide' });
-    if (points >= 500) badges.push({ icon: '💎', title: 'Diamond Legend' });
+    if (points >= 50) badges.push({ icon: '🥉', title: t('bronze') });
+    if (points >= 150) badges.push({ icon: '🥈', title: t('silver') });
+    if (points >= 300) badges.push({ icon: '🥇', title: t('gold') });
+    if (points >= 500) badges.push({ icon: '💎', title: t('diamond') });
 
     return (
         <div
             className="profile-card animate-slide-right"
             onClick={onClickLeaderboard}
-            title="View Top Contributors"
+            title={t('view_top')}
             style={{ cursor: 'pointer' }}
         >
             <div className="profile-header">
@@ -24,10 +26,10 @@ export default function ProfileCard({ points, rank, progress, user, onClickLeade
                     <span>{rank.emoji}</span>
                 </div>
                 <div className="profile-info">
-                    <div className="profile-rank-label">{rank.label}</div>
+                    <div className="profile-rank-label">{t(rank.tKey)}</div>
                     <div className="profile-points-value">
                         <Award size={14} />
-                        <span>{points} pts</span>
+                        <span>{points} {t('pts')}</span>
                     </div>
                     {badges.length > 0 && (
                         <div style={{ display: 'flex', gap: '4px', marginTop: '4px' }}>
@@ -39,7 +41,7 @@ export default function ProfileCard({ points, rank, progress, user, onClickLeade
                         </div>
                     )}
                 </div>
-                <button className="leaderboard-btn" aria-label="Leaderboard">
+                <button className="leaderboard-btn" aria-label={t('leaderboard')}>
                     <Trophy size={16} />
                 </button>
             </div>
@@ -49,7 +51,7 @@ export default function ProfileCard({ points, rank, progress, user, onClickLeade
                 </div>
                 <div className="profile-next">
                     <TrendingUp size={12} />
-                    <span>Next: {progress.nextMilestone} pts</span>
+                    <span>{t('next')}: {progress.nextMilestone} {t('pts')}</span>
                 </div>
             </div>
         </div>
