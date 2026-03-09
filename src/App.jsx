@@ -1,18 +1,20 @@
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import MapView from './MapView';
 import Sidebar from './Sidebar';
-import ProfileCard from './ProfileCard';
+
 import AddShopForm from './AddShopForm';
 import MilestoneToast from './components/MilestoneToast';
 import WelcomeModal from './components/WelcomeModal';
 import ShopDetailDrawer from './components/ShopDetailDrawer';
-import StatsBar from './components/StatsBar';
 import CategoryFilter from './components/CategoryFilter';
 import ToastNotification from './components/ToastNotification';
 import AuthPage from './components/AuthPage';
 import AdminLoginPage from './components/AdminLoginPage';
 import AdminDashboard from './components/AdminDashboard';
 import LeaderboardModal from './components/LeaderboardModal';
+import CoordinateModal from './components/CoordinateModal';
+import LandingPage from './components/LandingPage';
+import DashboardView from './components/DashboardView';
 import useShops from './hooks/useShops';
 import usePoints from './hooks/usePoints';
 import useFavorites from './hooks/useFavorites';
@@ -62,10 +64,12 @@ export default function App() {
   }, []);
 
   // UI state
+  const [currentView, setCurrentView] = useState('landing'); // 'landing' | 'map' | 'dashboard'
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [isAddingMode, setIsAddingMode] = useState(false);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [showForm, setShowForm] = useState(false);
+  const [showCoordModal, setShowCoordModal] = useState(false);
   const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [milestones, setMilestones] = useState([]);
   const [selectedShop, setSelectedShop] = useState(null);
@@ -98,6 +102,16 @@ export default function App() {
     setIsAddingMode(true);
     setSelectedPosition(null);
     setShowForm(false);
+  }, []);
+
+  const handleStartCoordinates = useCallback(() => {
+    setShowCoordModal(true);
+  }, []);
+
+  const handleCoordSubmit = useCallback((latlng) => {
+    setShowCoordModal(false);
+    setSelectedPosition(latlng);
+    setShowForm(true);
   }, []);
 
   const handleMapClick = useCallback((latlng) => {
@@ -294,6 +308,25 @@ export default function App() {
     }
   }
 
+  // Render Landing Page
+  if (currentView === 'landing' && !isAdminRoute) {
+    return <LandingPage onSelect={setCurrentView} />;
+  }
+
+  // Render Dashboard
+  if (currentView === 'dashboard' && !isAdminRoute) {
+    return (
+      <DashboardView
+        shops={mapShops}
+        onBack={() => setCurrentView('landing')}
+        onShopClick={(shop) => {
+          setSelectedShop(shop);
+          setCurrentView('map');
+        }}
+      />
+    );
+  }
+
   // Regular user → Map view
   return (
     <div className="app-container">
@@ -308,6 +341,8 @@ export default function App() {
       <Sidebar
         shops={mapShops}
         onAddShop={handleStartAdding}
+        onAddShopByCoords={handleStartCoordinates}
+        onGoHome={() => setCurrentView('landing')}
         isOpen={sidebarOpen}
         setIsOpen={setSidebarOpen}
         onShopClick={handleShopClick}
@@ -315,31 +350,32 @@ export default function App() {
         favorites={favorites}
         onLogout={logout}
         currentUser={currentUser}
+        points={points}
       />
 
       {!isAddingMode && (
         <>
-          <ProfileCard
-            points={points}
-            rank={rank}
-            progress={progress}
-            user={currentUser}
-            onClickLeaderboard={() => setShowLeaderboard(true)}
-          />
+
 
           {/* Category Filter */}
           {shops.length > 0 && (
             <CategoryFilter active={categoryFilter} onChange={setCategoryFilter} shopCounts={shopCounts} />
           )}
 
-          {/* Stats Bar */}
-          {shops.length > 0 && <StatsBar shops={shops} favorites={favorites} points={points} />}
         </>
       )}
 
       {/* Add Shop Modal */}
       {showForm && selectedPosition && (
         <AddShopForm position={selectedPosition} onSubmit={handleFormSubmit} onCancel={handleCancel} />
+      )}
+
+      {/* Coordinate Modal */}
+      {showCoordModal && (
+        <CoordinateModal
+          onClose={() => setShowCoordModal(false)}
+          onSubmit={handleCoordSubmit}
+        />
       )}
 
       {/* Shop Detail Drawer */}

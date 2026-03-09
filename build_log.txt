@@ -1,0 +1,74 @@
+﻿[36mvite v7.3.1 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 19 modules transformed.
+node.exe : [31mΓ£ù[39m 
+Build failed in 890ms
+At line:1 char:1
++ & "C:\Program 
+Files\nodejs/node.exe" 
+"C:\Program 
+Files\nodejs/node_mo ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~
+    + CategoryInfo           
+   : NotSpecified: ([31mΓ£  
+  ù[39m Build failed in 8   
+ 90ms:String) [], RemoteE    
+xception
+    + FullyQualifiedErrorId  
+   : NativeCommandError
+ 
+[31merror during build:
+[31m[commonjs--resolver] 
+Failed to resolve entry for 
+package "react-map-gl". The 
+package may have incorrect 
+main/module/exports 
+specified in its 
+package.json: Missing "." 
+specifier in "react-map-gl" 
+package[31m
+    at packageEntryFailure (f
+ile:///D:/marathi-shops-map/n
+ode_modules/vite/dist/node/ch
+unks/config.js:32816:32)
+    at resolvePackageEntry (f
+ile:///D:/marathi-shops-map/n
+ode_modules/vite/dist/node/ch
+unks/config.js:32811:3)
+    at tryNodeResolve (file:/
+//D:/marathi-shops-map/node_m
+odules/vite/dist/node/chunks/
+config.js:32716:70)
+    at Object.handler (file:/
+//D:/marathi-shops-map/node_m
+odules/vite/dist/node/chunks/
+config.js:32555:16)
+    at Object.handler (file:/
+//D:/marathi-shops-map/node_m
+odules/vite/dist/node/chunks/
+config.js:33706:13)
+    at file:///D:/marathi-sho
+ps-map/node_modules/rollup/di
+st/es/shared/node-entry.js:22
+548:40
+    at async PluginDriver.hoo
+kFirstAndGetPlugin (file:///D
+:/marathi-shops-map/node_modu
+les/rollup/dist/es/shared/nod
+e-entry.js:22430:28)
+    at async resolveId (file:
+///D:/marathi-shops-map/node_
+modules/rollup/dist/es/shared
+/node-entry.js:20889:26)
+    at async 
+ModuleLoader.resolveId (file:
+///D:/marathi-shops-map/node_
+modules/rollup/dist/es/shared
+/node-entry.js:21335:15)
+    at async 
+Object.resolveId (file:///D:/
+marathi-shops-map/node_module
+s/vite/dist/node/chunks/confi
+g.js:4154:21)[39m
