@@ -84,7 +84,7 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
     return (
         <div style={{ display: 'flex', flexDirection: 'column', height: '100%', background: 'var(--bg-dark)' }}>
             {/* Header */}
-            <header style={{ background: 'var(--bg-card)', padding: '15px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '15px', position: 'sticky', top: 0, zIndex: 10 }}>
+            <header style={{ background: 'var(--bg-glass)', backdropFilter: 'blur(12px)', WebkitBackdropFilter: 'blur(12px)', padding: '15px 20px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: '15px', position: 'sticky', top: 0, zIndex: 10 }}>
                 <button
                     onClick={onBack}
                     style={{ background: 'transparent', border: 'none', color: 'var(--text-primary)', cursor: 'pointer', padding: '5px' }}
@@ -141,11 +141,20 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
                                     flexDirection: 'column',
                                     gap: '12px',
                                     transition: 'var(--transition)',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    boxShadow: 'var(--shadow-sm)'
                                 }}
                                 onClick={() => onShopClick(shop)}
-                                onMouseOver={(e) => e.currentTarget.style.borderColor = 'var(--saffron)'}
-                                onMouseOut={(e) => e.currentTarget.style.borderColor = 'var(--border)'}
+                                onMouseOver={(e) => {
+                                    e.currentTarget.style.borderColor = 'var(--saffron)';
+                                    e.currentTarget.style.transform = 'translateY(-4px)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-md)';
+                                }}
+                                onMouseOut={(e) => {
+                                    e.currentTarget.style.borderColor = 'var(--border)';
+                                    e.currentTarget.style.transform = 'translateY(0)';
+                                    e.currentTarget.style.boxShadow = 'var(--shadow-sm)';
+                                }}
                             >
                                 <div style={{ display: 'flex', gap: '12px' }}>
                                     {shop.images?.length > 0 ? (
