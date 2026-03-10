@@ -28,6 +28,7 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
     const { t } = useTranslation();
     const [userLocation, setUserLocation] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [radiusKm, setRadiusKm] = useState(5); // Default 5km radius
     const [locating, setLocating] = useState(true);
 
     useEffect(() => {
@@ -64,8 +65,10 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
             return { ...shop, distance };
         });
 
-        // Filter within 1km
-        processedShops = processedShops.filter(shop => shop.distance <= 1.0);
+        // Filter within selected radius
+        if (radiusKm > 0) {
+            processedShops = processedShops.filter(shop => shop.distance <= radiusKm);
+        }
 
         // Sort by closest first
         processedShops.sort((a, b) => a.distance - b.distance);
@@ -94,14 +97,14 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
                 <div style={{ flex: 1 }}>
                     <h1 style={{ fontSize: '1.2rem', margin: 0, color: 'var(--text-primary)' }}>Local Directory</h1>
                     <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', margin: 0, display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <MapPin size={12} /> {locating ? 'Finding your location...' : userLocation ? 'Showing shops within 1km' : 'Location unavailable'}
+                        <MapPin size={12} /> {locating ? 'Finding your location...' : userLocation ? (radiusKm > 0 ? `Showing shops within ${radiusKm}km` : 'Showing all shops') : 'Location unavailable'}
                     </p>
                 </div>
             </header>
 
-            {/* Search */}
-            <div style={{ padding: '20px 20px 10px' }}>
-                <div className="search-input-wrapper" style={{ background: 'var(--bg-card)' }}>
+            {/* Search and Filters */}
+            <div style={{ padding: '20px 20px 10px', display: 'flex', gap: '10px' }}>
+                <div className="search-input-wrapper" style={{ background: 'var(--bg-card)', flex: 1 }}>
                     <Search size={18} />
                     <input
                         type="text"
@@ -112,6 +115,30 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
                         style={{ padding: '10px' }}
                     />
                 </div>
+                {userLocation && (
+                    <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-card)', borderRadius: 'var(--radius-md)', padding: '0 12px', border: '1px solid var(--border)' }}>
+                        <select
+                            value={radiusKm}
+                            onChange={(e) => setRadiusKm(Number(e.target.value))}
+                            style={{
+                                background: 'transparent',
+                                border: 'none',
+                                color: 'var(--text-primary)',
+                                outline: 'none',
+                                fontSize: '0.9rem',
+                                cursor: 'pointer',
+                            }}
+                        >
+                            <option value={1}>1 km</option>
+                            <option value={3}>3 km</option>
+                            <option value={5}>5 km</option>
+                            <option value={10}>10 km</option>
+                            <option value={20}>20 km</option>
+                            <option value={50}>50 km</option>
+                            <option value={0}>All</option>
+                        </select>
+                    </div>
+                )}
             </div>
 
             {/* List */}
@@ -125,7 +152,7 @@ export default function DashboardView({ shops, onBack, onShopClick }) {
                     <div className="empty-state" style={{ background: 'var(--bg-card)', borderRadius: 'var(--radius-lg)' }}>
                         <Store size={48} color="var(--text-muted)" />
                         <h3>No shops found</h3>
-                        <p>{userLocation ? "There seem to be no Marathi shops within 1km of your current location." : "Could not find any matching shops."}</p>
+                        <p>{userLocation ? (radiusKm > 0 ? `There seem to be no Marathi shops within ${radiusKm}km of your current location.` : "There are currently no shops.") : "Could not find any matching shops."}</p>
                     </div>
                 ) : (
                     <div style={{ display: 'grid', gap: '15px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>

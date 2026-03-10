@@ -1,23 +1,44 @@
 import React from 'react';
-import { Map, LayoutList, Navigation, Sparkles } from 'lucide-react';
+import { Map, LayoutList, Navigation, Sparkles, LogOut } from 'lucide-react';
 import { useTranslation } from '../i18n.jsx';
 
-export default function LandingPage({ onSelect }) {
+export default function LandingPage({ onSelect, onLogout, currentUser }) {
     const { t } = useTranslation();
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflow: 'hidden', background: 'var(--bg-dark)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', height: '100%', position: 'relative', overflowX: 'hidden', overflowY: 'auto', background: 'var(--bg-dark)' }}>
 
             {/* Animated SaaS Blobs */}
             <div className="saas-blob saffron"></div>
             <div className="saas-blob blue"></div>
 
             {/* Nav */}
-            <nav style={{ zIndex: 10, padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <nav style={{ zIndex: 10, padding: '24px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span style={{ fontSize: '1.8rem' }}>🚩</span>
                     <h1 style={{ color: 'var(--text-primary)', fontSize: '1.25rem', fontWeight: 800, margin: 0, letterSpacing: '-0.5px' }}>{t('app_title')}</h1>
                 </div>
+                {currentUser && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                        <span style={{ color: 'var(--text-secondary)', fontSize: '0.9rem', fontWeight: 500 }}>
+                            👋 {currentUser.name}
+                        </span>
+                        <button
+                            onClick={onLogout}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: '6px',
+                                background: 'transparent', border: '1px solid var(--border)',
+                                color: 'var(--text-primary)', padding: '6px 14px',
+                                borderRadius: 'var(--radius-xl)', cursor: 'pointer',
+                                fontSize: '0.85rem', fontWeight: 600, transition: 'var(--transition)'
+                            }}
+                            onMouseOver={(e) => { e.currentTarget.style.borderColor = 'var(--text-muted)'; }}
+                            onMouseOut={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; }}
+                        >
+                            <LogOut size={14} /> Logout
+                        </button>
+                    </div>
+                )}
             </nav>
 
             {/* Main Content */}

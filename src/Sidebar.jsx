@@ -11,11 +11,7 @@ const CATEGORY_COLORS = {
     Other: '#6b7280',
 };
 
-const MOCK_USERS = [
-    { id: 'mock-1', name: 'Ramesh Patil', points: 3450 },
-    { id: 'mock-2', name: 'Sneha Deshmukh', points: 2800 },
-    { id: 'mock-3', name: 'Vivek Kadam', points: 1950 },
-];
+
 
 /**
  * Collapsible sidebar with search, tabs (All / Favorites / Recent), shop list,
@@ -47,18 +43,7 @@ export default function Sidebar({ shops, onAddShop, onAddShopByCoords, onGoHome,
         localStorage.setItem('marathi-shops-dark', newMode.toString());
     };
 
-    const leaderboard = [
-        ...MOCK_USERS,
-        {
-            id: currentUser?.id || 'you',
-            name: (currentUser?.name || 'You') + ' (You)',
-            points: points || 0,
-            isCurrentUser: true,
-        },
-    ]
-        .sort((a, b) => b.points - a.points)
-        .filter((user, index, self) => index === self.findIndex(u => u.id === user.id))
-        .slice(0, 3);
+
 
     // Filter by search
     let filtered = shops.filter(
@@ -238,25 +223,15 @@ export default function Sidebar({ shops, onAddShop, onAddShopByCoords, onGoHome,
                     )}
                 </div>
 
-                {/* Mini Top Contributors */}
-                <div style={{ padding: '15px 20px', borderTop: '1px solid var(--border)', background: 'var(--bg-light)' }}>
-                    <h3 style={{ fontSize: '0.85rem', marginBottom: '10px', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <Trophy size={14} color="#f59e0b" /> {t && t('top_contributors') ? t('top_contributors') : 'Top Contributors'}
-                    </h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                        {leaderboard.map((user, idx) => (
-                            <div key={user.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.8rem', color: user.isCurrentUser ? 'var(--primary)' : 'inherit', fontWeight: user.isCurrentUser ? 600 : 400 }}>
-                                <span style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>{idx + 1}. {user.name}</span>
-                                <span style={{ fontWeight: 600 }}>{user.points} pts</span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-
                 {/* Footer */}
                 <div className="sidebar-footer">
                     <div className="sidebar-user-row">
-                        <span className="sidebar-user-name">👋 {currentUser?.name || 'User'}</span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                            <span className="sidebar-user-name">👋 {currentUser?.name || 'User'}</span>
+                            <span style={{ fontSize: '0.75rem', color: 'var(--saffron)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '4px' }}>
+                                <Trophy size={12} /> {points || 0} pts
+                            </span>
+                        </div>
                         <div style={{ display: 'flex', gap: '6px' }}>
                             {currentUser?.role === 'admin' && (
                                 <button

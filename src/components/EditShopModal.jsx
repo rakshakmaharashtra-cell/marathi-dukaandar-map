@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { X, Check } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Check, ImagePlus, Trash2 } from 'lucide-react';
+import { supabase } from '../supabaseClient';
 
 const CATEGORIES = [
     { value: 'Food', label: '🍛 Food' },
@@ -19,16 +20,67 @@ export default function EditShopModal({ shop, onClose, onSave }) {
         phone: shop.phone || '',
         opening_hours: shop.opening_hours || '',
     });
+    const [images, setImages] = useState(
+        (shop.images || []).map(url => ({ url, name: 'Existing file' }))
+    );
     const [submitting, setSubmitting] = useState(false);
+    const fileInputRef = useRef(null);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
+    const handleImageChange = (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const newImages = files.map(file => ({
+            file,
+            previewUrl: URL.createObjectURL(file),
+            name: file.name
+        }));
+        setImages((prev) => [...prev, ...newImages].slice(0, 5));
+
+        if (fileInputRef.current) fileInputRef.current.value = '';
+    };
+
+    const removeImage = (index) => {
+        setImages((prev) => prev.filter((_, i) => i !== index));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitting(true);
-        const success = await onSave(shop.id, formData);
+
+        const uploadedUrls = [];
+        for (const img of images) {
+            if (img.file) {
+                const fileExt = img.file.name.split('.').pop();
+                const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
+
+                const { error: uploadError } = await supabase.storage
+                    .from('shop-images')
+                    .upload(fileName, img.file);
+
+                if (!uploadError) {
+                    const { data } = supabase.storage.from('shop-images').getPublicUrl(fileName);
+                    if (data?.publicUrl) {
+                        uploadedUrls.push(data.publicUrl);
+                    }
+                }
+            } else if (img.url) {
+                // Keep existing URLs
+                uploadedUrls.push(img.url);
+            }
+        }
+
+        const updatePayload = {
+            ...formData,
+            images: uploadedUrls,
+            status: 'pending' // Force back to pending so admin MUST approve edits
+        };
+
+        const success = await onSave(shop.id, updatePayload);
         setSubmitting(false);
         if (success) {
             onClose();
@@ -130,6 +182,43 @@ export default function EditShopModal({ shop, onClose, onSave }) {
                                 onChange={handleChange}
                             />
                         </div>
+                    </div >
+                    <div className="form-group">
+                        <label>
+                            Shop Images <span className="optional">(up to 5)</span>
+                        </label>
+                        <div className="image-upload-area">
+                            <input
+                                ref={fileInputRef}
+                                type="file"
+                                accept="image/*"
+                                multiple
+                                className="file-input-hidden"
+                                id="shop-images-edit"
+                                onChange={handleImageChange}
+                            />
+                            <label htmlFor="shop-images-edit" className="image-upload-trigger">
+                                <ImagePlus size={24} />
+                                <span>{submitting ? 'Processing...' : 'Click to add images'}</span>
+                            </label>
+                        </div>
+                        {images.length > 0 && (
+                            <div className="image-preview-grid">
+                                {images.map((img, i) => (
+                                    <div key={i} className="image-preview-item">
+                                        <img src={img.previewUrl || img.url} alt={img.name} />
+                                        <button
+                                            type="button"
+                                            className="image-remove-btn"
+                                            onClick={() => removeImage(i)}
+                                            aria-label="Remove image"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <div className="auth-actions">

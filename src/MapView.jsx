@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react';
 import Map, { Marker, Popup, GeolocateControl, NavigationControl } from '@vis.gl/react-maplibre';
 import maplibregl from 'maplibre-gl';
-import { Layers } from 'lucide-react';
+import { Layers, Utensils, Shirt, Wrench, ShoppingCart, Smartphone, Package, Store } from 'lucide-react';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import MapSearchBox from './components/MapSearchBox';
 
 // Category colors for custom markers
 const CATEGORY_COLORS = {
@@ -61,6 +62,7 @@ const makeRasterStyle = (layer) => ({
             tiles: [layer.url],
             tileSize: 256,
             attribution: layer.attribution,
+            maxzoom: 19,
         },
     },
     layers: [
@@ -110,6 +112,7 @@ export default function MapView({ shops, onMapClick, isAddingMode, onShopClick, 
                 mapLib={maplibregl}
                 onClick={handleMapClick}
                 cursor={isAddingMode ? 'crosshair' : 'grab'}
+                maxZoom={19}
             >
                 <GeolocateControl position="bottom-right" style={{ marginBottom: '120px' }} />
                 <NavigationControl position="bottom-right" style={{ marginBottom: '160px' }} showCompass={false} />
@@ -122,26 +125,98 @@ export default function MapView({ shops, onMapClick, isAddingMode, onShopClick, 
                             key={shop.id}
                             longitude={shop.position[1]}
                             latitude={shop.position[0]}
-                            anchor="bottom"
+                            anchor="center"
                             onClick={(e) => {
                                 e.originalEvent.stopPropagation();
                                 setPopupInfo(shop);
                                 if (onShopClick) onShopClick(shop);
                             }}
                         >
-                            <div style={{ cursor: 'pointer', position: 'relative' }}>
-                                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
-                                    <defs>
-                                        <filter id="shadow" x="-20%" y="-10%" width="140%" height="140%">
-                                            <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#000" floodOpacity="0.3" />
-                                        </filter>
-                                    </defs>
-                                    <path d="M16 0C7.2 0 0 7.2 0 16c0 12 16 26 16 26s16-14 16-26C32 7.2 24.8 0 16 0z"
-                                        fill={color} filter="url(#shadow)" />
-                                    <circle cx="16" cy="15" r="7" fill="white" opacity="0.9" />
-                                    <text x="16" y="19" textAnchor="middle" fontSize="11" fill={color}>🏪</text>
-                                    {isFav && <text x="16" y="8" textAnchor="middle" fontSize="8" fill="#ef4444">♥</text>}
-                                </svg>
+                            <div style={{
+                                cursor: 'pointer',
+                                position: 'relative',
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center'
+                            }}>
+                                <div style={{
+                                    width: '32px',
+                                    height: '32px',
+                                    borderRadius: '50%',
+                                    backgroundColor: color,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    boxShadow: '0 4px 12px rgba(0,0,0,0.3), 0 0 0 3px var(--bg-card)',
+                                    position: 'relative',
+                                    transition: 'transform 0.2s',
+                                }}
+                                    onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.15) translateY(-4px)'}
+                                    onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                                >
+                                    {/* Icon */}
+                                    <div style={{ color: '#fff', display: 'flex' }}>
+                                        {shop.category === 'Food' ? <Utensils size={16} /> :
+                                            shop.category === 'Clothing' ? <Shirt size={16} /> :
+                                                shop.category === 'Services' ? <Wrench size={16} /> :
+                                                    shop.category === 'Groceries' ? <ShoppingCart size={16} /> :
+                                                        shop.category === 'Electronics' ? <Smartphone size={16} /> :
+                                                            <Store size={16} />}
+                                    </div>
+
+                                    {/* Pin bottom indicator */}
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '-8px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        width: '0',
+                                        height: '0',
+                                        borderLeft: '6px solid transparent',
+                                        borderRight: '6px solid transparent',
+                                        borderTop: `8px solid var(--bg-card)`,
+                                        zIndex: -1
+                                    }}></div>
+                                    <div style={{
+                                        position: 'absolute',
+                                        bottom: '-4px',
+                                        left: '50%',
+                                        transform: 'translateX(-50%)',
+                                        width: '0',
+                                        height: '0',
+                                        borderLeft: '4px solid transparent',
+                                        borderRight: '4px solid transparent',
+                                        borderTop: `6px solid ${color}`,
+                                    }}></div>
+                                    {isFav && (
+                                        <div style={{
+                                            position: 'absolute', top: '-4px', right: '-4px',
+                                            background: 'var(--bg-card)', borderRadius: '50%', width: '12px', height: '12px',
+                                            display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                            boxShadow: 'var(--shadow-sm)'
+                                        }}>
+                                            <span style={{ fontSize: '8px', color: '#ef4444' }}>♥</span>
+                                        </div>
+                                    )}
+                                </div>
+                                {viewState.zoom >= 14 && (
+                                    <div className="animate-fade" style={{
+                                        marginTop: '6px',
+                                        backgroundColor: 'var(--bg-glass)',
+                                        backdropFilter: 'blur(8px)',
+                                        WebkitBackdropFilter: 'blur(8px)',
+                                        padding: '4px 10px',
+                                        borderRadius: 'var(--radius-xl)',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '600',
+                                        color: 'var(--text-primary)',
+                                        boxShadow: 'var(--shadow-sm)',
+                                        border: '1px solid var(--border)',
+                                        whiteSpace: 'nowrap',
+                                    }}>
+                                        {shop.name}
+                                    </div>
+                                )}
                             </div>
                         </Marker>
                     );
@@ -226,6 +301,23 @@ export default function MapView({ shops, onMapClick, isAddingMode, onShopClick, 
                     </div>
                 )}
             </div>
+
+            {/* Map Search Overlay */}
+            {!isAddingMode && (
+                <MapSearchBox
+                    shops={shops}
+                    userLocation={viewState}
+                    onSelectShop={(shop) => {
+                        setPopupInfo(shop);
+                        if (onShopClick) onShopClick(shop);
+                    }}
+                    onSelectLocation={(loc) => setViewState({
+                        ...viewState,
+                        ...loc,
+                        transitionDuration: 1000 // Smooth panning transition to the location
+                    })}
+                />
+            )}
 
             {/* Adding mode banner */}
             {isAddingMode && (

@@ -360,6 +360,35 @@ select {
   transform: scale(1.05);
 }
 
+/* MapLibre Controls Override matching map-control-btn */
+.maplibregl-ctrl-group {
+  border-radius: var(--radius-md) !important;
+  border: 1px solid var(--border) !important;
+  background: var(--bg-glass) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow: var(--shadow-sm) !important;
+  overflow: hidden;
+}
+
+.maplibregl-ctrl-group button {
+  width: 42px !important;
+  height: 42px !important;
+  background-color: transparent !important;
+  transition: var(--transition) !important;
+}
+
+.maplibregl-ctrl-group button:hover {
+  background-color: var(--bg-card-hover) !important;
+}
+
+.maplibregl-ctrl-group button+button {
+  border-top: 1px solid var(--border) !important;
+}
+
+.dark .maplibregl-ctrl-icon {
+  filter: invert(1) !important;
+}
+
 .locate-btn {
   position: absolute;
   bottom: 120px;
@@ -1046,6 +1075,19 @@ select {
 .user-logout-btn:hover {
   background: var(--danger);
   color: #fff;
+}
+
+/* ══════════════════════
+   MAP SEARCH BAR
+   ══════════════════════ */
+.map-search-container {
+  position: absolute;
+  top: 16px;
+  left: 70px;
+  /* Right beside the mobile-menu-btn */
+  z-index: 1000;
+  width: calc(100% - 86px);
+  max-width: 320px;
 }
 
 /* ══════════════════════
@@ -2794,10 +2836,22 @@ select {
   }
 
   .category-filter-container {
-    top: 70px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 90%;
+    top: 16px;
+    right: 16px;
+    left: auto;
+    transform: none;
+    width: auto;
+    max-width: calc(100% - 70px);
+    /* Prevent overlapping with the mobile menu button */
+    justify-content: flex-end;
+  }
+
+  .map-search-container {
+    left: 70px;
+    /* Stay beside the menu button */
+    width: calc(100% - 190px);
+    /* Leave ~120px for the filter button on the right */
+    max-width: none;
   }
 
   .stats-bar {

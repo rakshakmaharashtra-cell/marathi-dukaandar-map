@@ -265,6 +265,7 @@ export default function App() {
           onReject={handleRejectShop}
           onLogout={() => { logout(); window.location.hash = '#/admin'; }}
           currentUser={currentUser}
+          points={points}
         />
         {toast && (
           <ToastNotification message={toast.message} type={toast.type} onDismiss={() => setToast(null)} />
@@ -310,7 +311,7 @@ export default function App() {
 
   // Render Landing Page
   if (currentView === 'landing' && !isAdminRoute) {
-    return <LandingPage onSelect={setCurrentView} />;
+    return <LandingPage onSelect={setCurrentView} onLogout={logout} currentUser={currentUser} />;
   }
 
   // Render Dashboard

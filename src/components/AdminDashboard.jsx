@@ -2,8 +2,14 @@ import React, { useState, useMemo } from 'react';
 import {
     ShieldCheck, CheckCircle, XCircle, Clock, Store,
     ChevronDown, ChevronUp, LogOut, MapPin,
-    Filter, Search, X,
+    Filter, Search, X, Trophy
 } from 'lucide-react';
+
+const MOCK_USERS = [
+    { id: 'mock-1', name: 'Ramesh Patil', points: 3450 },
+    { id: 'mock-2', name: 'Sneha Deshmukh', points: 2800 },
+    { id: 'mock-3', name: 'Vivek Kadam', points: 1950 },
+];
 
 const CATEGORY_COLORS = {
     Food: '#ef4444',
@@ -27,10 +33,24 @@ export default function AdminDashboard({
     onReject,
     onLogout,
     currentUser,
+    points,
 }) {
     const [statusFilter, setStatusFilter] = useState('pending');
     const [expandedId, setExpandedId] = useState(null);
     const [searchTerm, setSearchTerm] = useState('');
+
+    const leaderboard = [
+        ...MOCK_USERS,
+        {
+            id: currentUser?.id || 'admin',
+            name: (currentUser?.name || 'Admin') + ' (You)',
+            points: points || 0,
+            isCurrentUser: true,
+        },
+    ]
+        .sort((a, b) => b.points - a.points)
+        .filter((user, index, self) => index === self.findIndex(u => u.id === user.id))
+        .slice(0, 3);
 
     const displayedShops = useMemo(() => {
         let list;
@@ -119,6 +139,24 @@ export default function AdminDashboard({
                             <span className="admin-stat-number">{rejectedShops.length}</span>
                             <span className="admin-stat-label">Rejected</span>
                         </div>
+                    </div>
+                </div>
+
+                {/* Top Contributors Section */}
+                <div style={{ background: 'var(--bg-card)', padding: '20px', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', marginBottom: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-primary)', fontWeight: '600', fontSize: '1.05rem' }}>
+                        <Trophy size={20} color="#f59e0b" /> Top Community Contributors
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
+                        {leaderboard.map((user, idx) => (
+                            <div key={user.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'var(--bg-surface)', padding: '12px 16px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', color: user.isCurrentUser ? 'var(--primary)' : 'var(--text-primary)', fontWeight: user.isCurrentUser ? '600' : '400' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.9rem', fontWeight: 'bold' }}>#{idx + 1}</span>
+                                    <span style={{ textOverflow: 'ellipsis', whiteSpace: 'nowrap', overflow: 'hidden' }}>{user.name}</span>
+                                </div>
+                                <span style={{ fontWeight: 600, color: 'var(--saffron)' }}>{user.points} pts</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
 
